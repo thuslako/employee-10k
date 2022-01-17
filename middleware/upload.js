@@ -1,22 +1,28 @@
-const multer = require('multer')
-const grid = require('multer-gridfs-storage')
+const path = require('path')
+const util = require("util")
 const crypto = require('crypto')
+const multer = require('multer')
+const {GridFsStorage} = require('multer-gridfs-storage')
 
-const storage = new grid({
- url : process.env.MDB_URI, 
- cache: true,
- file: (req,file) => {
-   return new Promise((resolve, reject)=>{
-      crypto.randomBytes(8, (error, buffer) =>{
-        if(error) return reject(error)
-        const encryptedName = `${buffer.toString('hex')}-${Date.now()}`
-        resolve({
-          fileName: encryptedName,
+const storage = new GridFsStorage({
+  url: process.env.MDB_URI,
+  cache: true,
+  file: (req, file) => {
+    return new Promise((resolve, reject) => {
+      crypto.randomBytes(8, (err, buf) => {
+        if (err) {
+          return reject(err);
+        }
+        const filename = buf.toString('hex') + path.extname(file.originalname);
+        const fileInfo = {
+          filename: filename,
           bucketName: 'uploads'
-        })
-      })
-   })
- }
-})
-
-module.exports = multer({storage})
+        };
+        resolve(fileInfo);
+      });
+    });
+  }
+});
+const middleware = multer({ storage }).single('avatar')
+const upload = util.promisify(middleware)
+module.exports = upload

@@ -1,14 +1,23 @@
 
 const mongoose = require('mongoose')
-
-const linkMDB = async ()=>{
+const config = {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+} 
+module.exports = async ()=>{
   try {
-    const  access = await mongoose.connect(process.env.MDB_URI) 
-    console.log(`|connection created|> ${access.connection.host} <|`)
+      const connectionParams = {
+          useNewUrlParser: true,
+          useUnifiedTopology: true,
+      };
+      await mongoose.connect(process.env.MDB_URI, connectionParams);
+      console.log("connected to database");
   } catch (error) {
-    console.error(error)
-    process.exit(1)
+    console.log(error);
+    console.log("could not connect to database");
   }
-}
+};
 
-module.exports = linkMDB
+
+
+  
